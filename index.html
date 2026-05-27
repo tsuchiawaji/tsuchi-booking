@@ -364,7 +364,7 @@ function showBookingForm() {
       '<div class="form-field"><label>参加人数 &nbsp;Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
     '</div>' +
     '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com"></div>' +
-    '<div class="form-field"><label>電話番号 &nbsp;Tel</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
+    '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
     '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
     '<button class="submit-btn" id="btn-submit" onclick="submitBooking()">予約を確定する &nbsp;— Reserve</button>' +
@@ -388,6 +388,7 @@ function submitBooking() {
     errEl.style.display='block'; return;
   }
   if(email !== email2){errEl.textContent='メールアドレスが一致していません。ご確認ください。';errEl.style.display='block';return;}
+  if(!tel){errEl.textContent='電話番号を入力してください';errEl.style.display='block';return;}
   if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は1〜'+MAX_PEOPLE+'名です';errEl.style.display='block';return;}
 
   var btn = document.getElementById('btn-submit');
