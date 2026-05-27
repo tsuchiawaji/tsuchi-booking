@@ -17,15 +17,16 @@
   --full:    #8B7355;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--cream);color:var(--soil)}
-body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding:0}
+html{background:#E8E0D4;color:var(--soil)}
+body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding:32px 40px;}
+.wrapper{max-width:1100px;margin:0 auto;background:var(--cream);box-shadow:0 2px 40px rgba(61,46,30,0.08);}
 
 /* ヘッダー */
-.site-header{padding:40px 48px 32px;border-bottom:0.5px solid var(--tan)}
-.site-header h1{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-weight:300;font-size:13px;letter-spacing:0.3em;color:var(--mid);text-transform:uppercase;margin-bottom:6px}
-.exhibition-title{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-weight:300;font-size:32px;letter-spacing:0.15em;color:var(--soil);line-height:1}
-.exhibition-sub{font-size:11px;letter-spacing:0.25em;color:var(--mid);margin-top:4px}
-.period{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-size:13px;letter-spacing:0.15em;color:var(--mid);margin-top:8px}
+.site-header{padding:48px 56px 40px;border-bottom:0.5px solid var(--tan)}
+.site-header h1{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-weight:300;font-size:14px;letter-spacing:0.35em;color:var(--mid);text-transform:uppercase;margin-bottom:10px}
+.exhibition-title{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-weight:400;font-size:52px;letter-spacing:0.2em;color:var(--soil);line-height:1}
+.exhibition-sub{font-size:14px;letter-spacing:0.3em;color:var(--mid);margin-top:8px}
+.period{font-family:'Cormorant Upright','Zen Old Mincho',serif;font-size:15px;letter-spacing:0.2em;color:var(--mid);margin-top:12px}
 
 /* メインレイアウト */
 .main{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 130px)}
@@ -109,7 +110,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 </head>
 <body>
 
-<header class="site-header">
+<div class="wrapper"><header class="site-header">
   <h1>TSUCHI — Japanese Soil Products</h1>
   <div class="exhibition-title">LAND TRACE</div>
   <div class="exhibition-sub">大地のプロダクト展</div>
@@ -164,7 +165,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 // ===================================================
 //  ★ Apps Script の URL を入れてください ★
 // ===================================================
-var API_URL = 'https://script.google.com/macros/s/AKfycbzvht9FSKifwj8yh4cISx_WoaYkhc_0LabqvFZYM-JStDBZi6-jxnPXhSMBFqodMCAf/exec';
+var API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 var MAX_GROUPS_WEEK = 2;
 var MAX_GROUPS_HOLI = 1;
@@ -435,5 +436,5 @@ function submitBooking() {
 
 initMonth();
 </script>
-</body>
+</div></body>
 </html>
