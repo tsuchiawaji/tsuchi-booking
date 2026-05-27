@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TSUCHI 展覧会予約</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;color:#1a1a1a;background:#f5f5f3;min-height:100vh;padding:24px 16px}
+  .header{margin-bottom:20px}
+  .header h1{font-size:22px;font-weight:500;letter-spacing:0.05em;margin-bottom:4px}
+  .header .period{font-size:13px;color:#888;margin-bottom:2px}
+  .header .sub{font-size:13px;color:#666}
+  .week-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .week-nav button{padding:7px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#1a1a1a}
+  .week-nav button:hover{background:#f0f0ee}
+  .week-nav button:disabled{opacity:0.35;cursor:default}
+  #week-label{flex:1;text-align:center;font-size:14px;font-weight:500}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:#555;align-items:center}
+  .leg{display:flex;align-items:center;gap:4px}
+  .leg-dot{width:11px;height:11px;border-radius:3px}
+  .cal-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:520px}
+  th{font-size:12px;font-weight:500;color:#666;padding:8px 3px;text-align:center;border-bottom:1px solid #e5e5e5}
+  th.wkend{color:#b04040}
+  th.today-h{color:#1a6fb4}
+  th.outofrange{color:#ccc}
+  td.tcol{font-size:11px;color:#aaa;padding:5px 7px 5px 0;white-space:nowrap;width:46px;vertical-align:middle}
+  td.slot{padding:3px 2px;vertical-align:middle}
+  .sb{width:100%;padding:7px 3px;border-radius:7px;border:0.5px solid;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px}
+  .so{background:#d1fae5;border-color:#059669;color:#065f46}
+  .so:hover{filter:brightness(0.94)}
+  .sl{background:#f0f0ee;border-color:#ccc;color:#aaa;cursor:default}
+  .sn{color:#ddd;text-align:center;display:block;padding:7px 0;font-size:13px}
+  .sout{color:#e5e5e5;text-align:center;display:block;padding:7px 0;font-size:11px}
+  .cap{font-size:10px;opacity:0.7}
+  .note{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#aaa}
+  .note span{display:flex;align-items:center;gap:4px}
+  .dot-w{width:7px;height:7px;border-radius:50%;background:#1a6fb4;display:inline-block}
+  .dot-h{width:7px;height:7px;border-radius:50%;background:#b04040;display:inline-block}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.38);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+  .modal{background:#fff;border-radius:14px;padding:20px 22px;width:min(420px,100%);box-shadow:0 8px 32px rgba(0,0,0,0.12);max-height:90vh;overflow-y:auto}
+  .modal h2{font-size:15px;font-weight:500;margin-bottom:12px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:#666;margin-bottom:4px}
+  .field input,.field textarea{width:100%;padding:9px 12px;border:0.5px solid #ccc;border-radius:8px;font-size:14px;outline:none;font-family:inherit}
+  .field input:focus,.field textarea:focus{border-color:#1a6fb4;box-shadow:0 0 0 3px rgba(26,111,180,0.12)}
+  .field input.narrow{width:80px}
+  .field textarea{resize:vertical;min-height:80px;line-height:1.6}
+  .modal-btns{display:flex;gap:8px;margin-top:16px}
+  .btn{flex:1;padding:10px;border:0.5px solid #ccc;border-radius:8px;font-size:13px;cursor:pointer;background:#fff}
+  .btn:hover{background:#f5f5f3}
+  .btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .btn-primary:hover{background:#333}
+  .btn-primary:disabled{background:#aaa;border-color:#aaa;cursor:default}
+  .success{background:#d1fae5;border-radius:12px;padding:20px;text-align:center;margin:20px 0}
+  .success .icon{font-size:28px;margin-bottom:8px;color:#065f46}
+  .success h3{font-size:15px;font-weight:500;color:#065f46;margin-bottom:6px}
+  .success p{font-size:13px;color:#047857;line-height:1.7}
+  .loading{text-align:center;padding:40px;color:#888;font-size:14px}
+  .error-msg{color:#c0392b;font-size:13px;margin-top:8px;display:none}
+  .info-row{font-size:13px;color:#555;margin-bottom:10px;padding:10px 12px;background:#f5f5f3;border-radius:8px}
+  .opt-note{font-size:12px;color:#aaa;margin-left:4px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>TSUCHI 展覧会予約</h1>
+  <p class="period">会期：2026年7月4日（土）〜 8月16日（日）</p>
+  <p class="sub">ご希望の日時を選んでその場で予約を確定できます。</p>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#d1fae5;border:0.5px solid #059669"></div>空きあり</div>
+  <div class="leg"><div class="leg-dot" style="background:#f0f0ee;border:0.5px solid #ccc"></div>満席</div>
+</div>
+
+<div class="week-nav">
+  <button id="btn-prev" onclick="shiftWeek(-1)">&#8249; 前の週</button>
+  <span id="week-label"></span>
+  <button id="btn-next" onclick="shiftWeek(1)">次の週 &#8250;</button>
+</div>
+
+<div class="cal-wrap">
+  <table id="cal"><tr><td class="loading" colspan="8">読み込み中...</td></tr></table>
+</div>
+<div class="note">
+  <span><span class="dot-w"></span>平日：13:00・14:00・15:00・16:00（各2組）</span>
+  <span><span class="dot-h"></span>土日祝：10:00・11:00・13:00〜17:00（各1組）</span>
+</div>
+
+<div id="modal-area"></div>
+
+<script>
+// ===================================================
+//  ★ここを自分のApps Script URLに変更してください★
+// ===================================================
+var API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+// ===================================================
+//  設定（コード_github用.gsと合わせてください）
+// ===================================================
+var MAX_GROUPS_WEEK = 2;
+var MAX_GROUPS_HOLI = 1;
+var MAX_PEOPLE      = 4;
+var DAYS        = ['月','火','水','木','金','土','日'];
+var ALL_SLOTS   = ['10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+var SLOTS_W     = ['13:00','14:00','15:00','16:00'];
+var SLOTS_H     = ['10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+var HOLIDAYS    = ['2026-07-20','2026-08-11'];
+var EVENT_START = '2026-07-04';
+var EVENT_END   = '2026-08-16';
+
+var weekOffset   = 0;
+var availability = {};
+var selectedSlot = null;
+
+function getMonday(d) {
+  var day = d.getDay();
+  var m = new Date(d);
+  m.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  m.setHours(0,0,0,0);
+  return m;
+}
+
+function parseDateLocal(str) {
+  var parts = str.split('-');
+  return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
+function getMondayByOffset(off) {
+  var now = new Date();
+  var m = getMonday(now);
+  m.setDate(m.getDate() + off * 7);
+  return m;
+}
+
+function fmtDate(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+
+function isHoli(ds) {
+  var d = parseDateLocal(ds);
+  var dow = d.getDay();
+  return dow === 0 || dow === 6 || HOLIDAYS.indexOf(ds) >= 0;
+}
+
+function slotsFor(ds) { return isHoli(ds) ? SLOTS_H : SLOTS_W; }
+function inRange(ds)  { return ds >= EVENT_START && ds <= EVENT_END; }
+
+function updateNavButtons() {
+  var i, d;
+  var prev = [], next = [];
+  for(i=0;i<7;i++){d=new Date(getMondayByOffset(weekOffset-1));d.setDate(d.getDate()+i);prev.push(d);}
+  for(i=0;i<7;i++){d=new Date(getMondayByOffset(weekOffset+1));d.setDate(d.getDate()+i);next.push(d);}
+  document.getElementById('btn-prev').disabled = !prev.some(function(d){return inRange(fmtDate(d));});
+  document.getElementById('btn-next').disabled = !next.some(function(d){return inRange(fmtDate(d));});
+}
+
+function getWeekDates() {
+  var mon = getMondayByOffset(weekOffset);
+  var result = [];
+  for(var i=0;i<7;i++){var d=new Date(mon);d.setDate(mon.getDate()+i);result.push(d);}
+  return result;
+}
+
+async function loadAvailability() {
+  document.getElementById('cal').innerHTML = '<tr><td class="loading" colspan="8">読み込み中...</td></tr>';
+  var weekStart = fmtDate(getMondayByOffset(weekOffset));
+  try {
+    var res  = await fetch(API_URL + '?weekStart=' + weekStart);
+    var data = await res.json();
+    availability = data;
+    renderCalendar();
+  } catch(e) {
+    document.getElementById('cal').innerHTML = '<tr><td style="padding:20px;color:#c00" colspan="8">データ取得エラー: ' + e.message + '</td></tr>';
+  }
+}
+
+function renderCalendar() {
+  var dates    = getWeekDates();
+  var todayStr = fmtDate(new Date());
+  var mon = getMondayByOffset(weekOffset);
+  var sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  document.getElementById('week-label').textContent = (mon.getMonth()+1) + '月' + mon.getDate() + '日 〜 ' + (sun.getMonth()+1) + '月' + sun.getDate() + '日';
+  updateNavButtons();
+
+  var html = '<thead><tr><th></th>';
+  for(var i=0;i<dates.length;i++) {
+    var d=dates[i]; var ds=fmtDate(d);
+    var cls = !inRange(ds)?'outofrange':ds===todayStr?'today-h':isHoli(ds)?'wkend':'';
+    html += '<th class="'+cls+'">'+DAYS[i]+'<br><span style="font-weight:400;font-size:12px">'+(d.getMonth()+1)+'/'+d.getDate()+'</span></th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  for(var ti=0;ti<ALL_SLOTS.length;ti++) {
+    var time = ALL_SLOTS[ti];
+    html += '<tr><td class="tcol">'+time+'</td>';
+    for(var di=0;di<dates.length;di++) {
+      var d=dates[di]; var ds=fmtDate(d);
+      if(!inRange(ds)){html+='<td class="slot"><span class="sout">—</span></td>';continue;}
+      var slots=slotsFor(ds);
+      if(slots.indexOf(time)<0){html+='<td class="slot"><span class="sn">—</span></td>';continue;}
+      var slot=(availability[ds]&&availability[ds][time])||{groups:0,maxGroups:isHoli(ds)?MAX_GROUPS_HOLI:MAX_GROUPS_WEEK,people:0};
+      var leftGroups = slot.maxGroups - slot.groups;
+      if(leftGroups<=0){
+        html+='<td class="slot"><div class="sb sl">満席</div></td>';
+      } else {
+        html+='<td class="slot"><button class="sb so" onclick="openModal(\''+ds+'\',\''+time+'\','+leftGroups+','+slot.maxGroups+')"><span>空きあり</span><span class="cap">残'+leftGroups+'組</span></button></td>';
+      }
+    }
+    html+='</tr>';
+  }
+  html+='</tbody>';
+  document.getElementById('cal').innerHTML = html;
+}
+
+function openModal(dateStr, time, left, maxG) {
+  selectedSlot = {dateStr:dateStr, time:time, left:left, maxG:maxG};
+  var parts = dateStr.split('-');
+  var m=parseInt(parts[1]); var d=parseInt(parts[2]);
+  var dayIdx = parseDateLocal(dateStr).getDay();
+  var disp = m+'月'+d+'日（'+DAYS[dayIdx===0?6:dayIdx-1]+'） '+time;
+  document.getElementById('modal-area').innerHTML =
+    '<div class="overlay" onclick="if(event.target===this)closeModal()">' +
+    '<div class="modal">' +
+    '<h2>&#128197; '+disp+'</h2>' +
+    '<div class="info-row">残り <strong>'+left+'</strong> 組（1組'+MAX_PEOPLE+'名まで）</div>' +
+    '<div class="field"><label>お名前 *</label><input type="text" id="inp-name" placeholder="山田 太郎" autocomplete="name"></div>' +
+    '<div class="field"><label>メールアドレス *</label><input type="email" id="inp-email" placeholder="example@email.com" autocomplete="email"></div>' +
+    '<div class="field"><label>電話番号 <span class="opt-note">（任意）</span></label><input type="tel" id="inp-tel" placeholder="090-0000-0000" autocomplete="tel"></div>' +
+    '<div class="field"><label>参加人数（'+MAX_PEOPLE+'名まで）</label><input type="number" id="inp-count" class="narrow" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
+    '<div class="field"><label>備考 <span class="opt-note">（任意）</span></label>' +
+    '<textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
+    '<p id="err-msg" class="error-msg"></p>' +
+    '<div class="modal-btns">' +
+    '<button class="btn" onclick="closeModal()">キャンセル</button>' +
+    '<button class="btn btn-primary" id="btn-confirm" onclick="confirmBooking()">予約を確定する</button>' +
+    '</div></div></div>';
+}
+
+function closeModal() {
+  document.getElementById('modal-area').innerHTML = '';
+}
+
+async function confirmBooking() {
+  var name  = document.getElementById('inp-name').value.trim();
+  var email = document.getElementById('inp-email').value.trim();
+  var tel   = document.getElementById('inp-tel').value.trim();
+  var count = parseInt(document.getElementById('inp-count').value) || 1;
+  var note  = document.getElementById('inp-note').value.trim();
+  var errEl = document.getElementById('err-msg');
+
+  if(!name){errEl.textContent='お名前は必須です';errEl.style.display='block';return;}
+  if(!email){errEl.textContent='メールアドレスは必須です';errEl.style.display='block';return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='メールアドレスの形式が正しくありません';errEl.style.display='block';return;}
+  if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は 1〜'+MAX_PEOPLE+' 名の範囲で入力してください';errEl.style.display='block';return;}
+
+  var btn = document.getElementById('btn-confirm');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  try {
+    var res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'book', params:{date:selectedSlot.dateStr, time:selectedSlot.time, name:name, email:email, tel:tel, count:count, note:note}})
+    });
+    var result = await res.json();
+    if(result.ok) {
+      var parts = selectedSlot.dateStr.split('-');
+      closeModal();
+      var el = document.createElement('div');
+      el.className = 'success';
+      el.innerHTML = '<div class="icon">&#10003;</div><h3>予約が確定しました</h3><p>'+parseInt(parts[1])+'月'+parseInt(parts[2])+'日 '+selectedSlot.time+'<br>'+name+' 様 ／ '+count+'名<br>予約ID: <strong>'+result.id+'</strong><br>確認メールをお送りしました。</p>';
+      document.querySelector('.cal-wrap').parentNode.insertBefore(el, document.querySelector('.cal-wrap'));
+      loadAvailability();
+    } else {
+      errEl.textContent = result.error || '予約に失敗しました';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '予約を確定する';
+    }
+  } catch(e) {
+    errEl.textContent = '通信エラーが発生しました: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '予約を確定する';
+  }
+}
+
+function shiftWeek(d) { weekOffset += d; loadAvailability(); }
+
+var _todayStr = fmtDate(new Date());
+var _target   = (_todayStr >= EVENT_START && _todayStr <= EVENT_END) ? _todayStr : EVENT_START;
+weekOffset = Math.round((getMonday(parseDateLocal(_target)) - getMonday(new Date())) / (7 * 86400000));
+
+loadAvailability();
+</script>
+</body>
+</html>
