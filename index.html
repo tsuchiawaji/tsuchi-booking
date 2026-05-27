@@ -373,14 +373,17 @@ function showBookingForm() {
 
 function submitBooking() {
   var name  = document.getElementById('inp-name').value.trim();
-  var email = document.getElementById('inp-email').value.trim();
+  var email = document.getElementById('inp-email').value.trim().toLowerCase();
   var tel   = document.getElementById('inp-tel').value.trim();
   var count = parseInt(document.getElementById('inp-count').value)||1;
   var note  = document.getElementById('inp-note').value.trim();
   var errEl = document.getElementById('err-msg');
 
   if(!name){errEl.textContent='お名前を入力してください';errEl.style.display='block';return;}
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='メールアドレスを正しく入力してください';errEl.style.display='block';return;}
+  var email2 = document.getElementById('inp-email2').value.trim().toLowerCase();
+  email = email.toLowerCase();
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='メールアドレスの形式が正しくありません（例：name@example.com）';errEl.style.display='block';return;}
+  if(email !== email2){errEl.textContent='メールアドレスが一致していません。ご確認ください。';errEl.style.display='block';return;}
   if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は1〜'+MAX_PEOPLE+'名です';errEl.style.display='block';return;}
 
   var btn = document.getElementById('btn-submit');
