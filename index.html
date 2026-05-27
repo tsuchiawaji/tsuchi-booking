@@ -168,17 +168,34 @@ function getWeekDates() {
   return result;
 }
 
-async function loadAvailability() {
+function jsonp(url, callbackName, onSuccess, onError) {
+  var script = document.createElement('script');
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    onSuccess(data);
+  };
+  script.onerror = function() {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    onError(new Error('通信エラー'));
+  };
+  script.src = url + '&callback=' + callbackName;
+  document.body.appendChild(script);
+}
+
+function loadAvailability() {
   document.getElementById('cal').innerHTML = '<tr><td class="loading" colspan="8">読み込み中...</td></tr>';
   var weekStart = fmtDate(getMondayByOffset(weekOffset));
-  try {
-    var res  = await fetch(API_URL + '?weekStart=' + weekStart);
-    var data = await res.json();
-    availability = data;
-    renderCalendar();
-  } catch(e) {
-    document.getElementById('cal').innerHTML = '<tr><td style="padding:20px;color:#c00" colspan="8">データ取得エラー: ' + e.message + '</td></tr>';
-  }
+  var cbName = 'cb_avail_' + Date.now();
+  jsonp(
+    API_URL + '?weekStart=' + weekStart,
+    cbName,
+    function(data) { availability = data; renderCalendar(); },
+    function(e) {
+      document.getElementById('cal').innerHTML = '<tr><td style="padding:20px;color:#c00" colspan="8">データ取得エラー: ' + e.message + '</td></tr>';
+    }
+  );
 }
 
 function renderCalendar() {
@@ -247,7 +264,7 @@ function closeModal() {
   document.getElementById('modal-area').innerHTML = '';
 }
 
-async function confirmBooking() {
+function confirmBooking() {
   var name  = document.getElementById('inp-name').value.trim();
   var email = document.getElementById('inp-email').value.trim();
   var tel   = document.getElementById('inp-tel').value.trim();
@@ -264,33 +281,44 @@ async function confirmBooking() {
   btn.disabled = true;
   btn.textContent = '送信中...';
 
-  try {
-    var res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({action:'book', params:{date:selectedSlot.dateStr, time:selectedSlot.time, name:name, email:email, tel:tel, count:count, note:note}})
-    });
-    var result = await res.json();
-    if(result.ok) {
-      var parts = selectedSlot.dateStr.split('-');
-      closeModal();
-      var el = document.createElement('div');
-      el.className = 'success';
-      el.innerHTML = '<div class="icon">&#10003;</div><h3>予約が確定しました</h3><p>'+parseInt(parts[1])+'月'+parseInt(parts[2])+'日 '+selectedSlot.time+'<br>'+name+' 様 ／ '+count+'名<br>予約ID: <strong>'+result.id+'</strong><br>確認メールをお送りしました。</p>';
-      document.querySelector('.cal-wrap').parentNode.insertBefore(el, document.querySelector('.cal-wrap'));
-      loadAvailability();
-    } else {
-      errEl.textContent = result.error || '予約に失敗しました';
+  var cbName = 'cb_book_' + Date.now();
+  var params = [
+    'action=book',
+    'date='  + encodeURIComponent(selectedSlot.dateStr),
+    'time='  + encodeURIComponent(selectedSlot.time),
+    'name='  + encodeURIComponent(name),
+    'email=' + encodeURIComponent(email),
+    'tel='   + encodeURIComponent(tel),
+    'count=' + encodeURIComponent(count),
+    'note='  + encodeURIComponent(note)
+  ].join('&');
+
+  jsonp(
+    API_URL + '?' + params,
+    cbName,
+    function(result) {
+      if(result.ok) {
+        var parts = selectedSlot.dateStr.split('-');
+        closeModal();
+        var el = document.createElement('div');
+        el.className = 'success';
+        el.innerHTML = '<div class="icon">&#10003;</div><h3>予約が確定しました</h3><p>'+parseInt(parts[1])+'月'+parseInt(parts[2])+'日 '+selectedSlot.time+'<br>'+name+' 様 ／ '+count+'名<br>予約ID: <strong>'+result.id+'</strong><br>確認メールをお送りしました。</p>';
+        document.querySelector('.cal-wrap').parentNode.insertBefore(el, document.querySelector('.cal-wrap'));
+        loadAvailability();
+      } else {
+        errEl.textContent = result.error || '予約に失敗しました';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '予約を確定する';
+      }
+    },
+    function(e) {
+      errEl.textContent = '通信エラーが発生しました: ' + e.message;
       errEl.style.display = 'block';
       btn.disabled = false;
       btn.textContent = '予約を確定する';
     }
-  } catch(e) {
-    errEl.textContent = '通信エラーが発生しました: ' + e.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '予約を確定する';
-  }
+  );
 }
 
 function shiftWeek(d) { weekOffset += d; loadAvailability(); }
