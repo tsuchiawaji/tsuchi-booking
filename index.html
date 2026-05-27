@@ -363,7 +363,8 @@ function showBookingForm() {
       '<div class="form-field"><label>お名前 &nbsp;Name *</label><input type="text" id="inp-name" placeholder="山田 太郎"></div>' +
       '<div class="form-field"><label>参加人数 &nbsp;Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
     '</div>' +
-    '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com"></div>' +
+    '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com" autocomplete="email" oninput="this.value=this.value.toLowerCase()"></div>' +
+    '<div class="form-field"><label>メールアドレス（確認） &nbsp;Email Confirm *</label><input type="email" id="inp-email2" placeholder="もう一度入力してください" autocomplete="off" onpaste="return false" ondrop="return false" oninput="this.value=this.value.toLowerCase()"></div>' +
     '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
     '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
@@ -372,22 +373,22 @@ function showBookingForm() {
 }
 
 function submitBooking() {
-  var name  = document.getElementById('inp-name').value.trim();
-  var email = document.getElementById('inp-email').value.trim().toLowerCase();
-  var tel   = document.getElementById('inp-tel').value.trim();
-  var count = parseInt(document.getElementById('inp-count').value)||1;
-  var note  = document.getElementById('inp-note').value.trim();
-  var errEl = document.getElementById('err-msg');
+  var name   = document.getElementById('inp-name').value.trim();
+  var email  = document.getElementById('inp-email').value.trim().toLowerCase();
+  var email2El = document.getElementById('inp-email2');
+  var email2 = email2El ? email2El.value.trim().toLowerCase() : '';
+  var tel    = document.getElementById('inp-tel').value.trim();
+  var count  = parseInt(document.getElementById('inp-count').value)||1;
+  var note   = document.getElementById('inp-note').value.trim();
+  var errEl  = document.getElementById('err-msg');
 
   if(!name){errEl.textContent='お名前を入力してください';errEl.style.display='block';return;}
-  var email2 = document.getElementById('inp-email2').value.trim().toLowerCase();
-  email = email.toLowerCase();
   var emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
   if(!email || !emailRegex.test(email)){
     errEl.textContent='メールアドレスの形式が正しくありません（例：name@example.com）';
     errEl.style.display='block'; return;
   }
-  if(email !== email2){errEl.textContent='メールアドレスが一致していません。ご確認ください。';errEl.style.display='block';return;}
+  if(email2El && email !== email2){errEl.textContent='メールアドレスが一致していません。ご確認ください。';errEl.style.display='block';return;}
   if(!tel){errEl.textContent='電話番号を入力してください';errEl.style.display='block';return;}
   if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は1〜'+MAX_PEOPLE+'名です';errEl.style.display='block';return;}
 
