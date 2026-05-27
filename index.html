@@ -135,7 +135,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
       <div class="cal-dow we">Sun</div>
     </div>
     <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--mid)"></div>空きあり（日付下のドット）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--mid)"></div>空きあり（日付下の●）</div>
       <div class="legend-item">
         <span style="font-size:11px;color:#8B3A2A;letter-spacing:0.05em">×</span>
         満席・会期外
@@ -143,17 +143,17 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
     </div>
     <div style="margin-top:20px;padding-top:20px;border-top:0.5px solid var(--light)">
       <div style="font-size:10px;letter-spacing:0.2em;color:var(--mid);line-height:2.2;font-family:'Zen Old Mincho',serif">
-        平日 &nbsp;&nbsp;13:00 – 17:00<br>
-        土日祝 &nbsp;10:00 – 18:00
+        平日 &nbsp;&nbsp;&nbsp;Weekday &nbsp;&nbsp;&nbsp;13:00 – 17:00<br>
+        土日祝 &nbsp;Weekend &nbsp;&nbsp;10:00 – 18:00
       </div>
     </div>
   </div>
 
   <!-- 右：時間帯 & フォーム -->
   <div class="right-panel" id="right-panel">
-    <div class="panel-title">Select Time</div>
+    <div class="panel-title">時間帯を選ぶ &nbsp;/&nbsp; Select Time</div>
     <div class="no-date" id="no-date-msg">
-      ← カレンダーから<br>日付をお選びください
+      ← カレンダーから日付をお選びください
     </div>
     <div class="time-list" id="time-list" style="display:none"></div>
     <div id="booking-form-wrap" style="display:none"></div>
@@ -165,7 +165,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 // ===================================================
 //  ★ Apps Script の URL を入れてください ★
 // ===================================================
-var API_URL = 'https://script.google.com/macros/s/AKfycbzvht9FSKifwj8yh4cISx_WoaYkhc_0LabqvFZYM-JStDBZi6-jxnPXhSMBFqodMCAf/exec';
+var API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 var MAX_GROUPS_WEEK = 2;
 var MAX_GROUPS_HOLI = 1;
@@ -360,14 +360,14 @@ function showBookingForm() {
     '<div class="booking-form">' +
     '<div class="selected-info">'+disp+'</div>' +
     '<div class="form-row">' +
-      '<div class="form-field"><label>Name *</label><input type="text" id="inp-name" placeholder="山田 太郎"></div>' +
-      '<div class="form-field"><label>Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
+      '<div class="form-field"><label>お名前 &nbsp;Name *</label><input type="text" id="inp-name" placeholder="山田 太郎"></div>' +
+      '<div class="form-field"><label>参加人数 &nbsp;Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
     '</div>' +
-    '<div class="form-field"><label>Email *</label><input type="email" id="inp-email" placeholder="example@email.com"></div>' +
-    '<div class="form-field"><label>Tel</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
-    '<div class="form-field"><label>Note</label><textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
+    '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com"></div>' +
+    '<div class="form-field"><label>電話番号 &nbsp;Tel</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
+    '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
-    '<button class="submit-btn" id="btn-submit" onclick="submitBooking()">Reserve — 予約を確定する</button>' +
+    '<button class="submit-btn" id="btn-submit" onclick="submitBooking()">予約を確定する &nbsp;— Reserve</button>' +
     '</div>';
 }
 
@@ -385,7 +385,7 @@ function submitBooking() {
 
   var btn = document.getElementById('btn-submit');
   btn.disabled=true;
-  btn.textContent='Sending...';
+  btn.textContent='送信中... Sending';
 
   var params=[
     'action=book',
@@ -412,8 +412,8 @@ function submitBooking() {
         sw.innerHTML =
           '<div class="success-panel">' +
           '<div class="check">—</div>' +
-          '<h3>Reservation Complete</h3>' +
-          '<p>'+disp+'<br>'+name+' 様 ／ '+count+'名<br><br>確認メールをお送りしました。</p>' +
+          '<h3>ご予約が確定しました</h3>' +
+          '<p>'+disp+'<br>'+name+' 様 ／ '+count+'名<br><br>確認メールをお送りしました。<br><span style="font-size:11px;letter-spacing:0.15em;color:var(--tan)">A confirmation email has been sent.</span></p>' +
           '<div class="booking-id">ID : '+res.id+'</div>' +
           '</div>';
         // 空き状況を再読み込み
