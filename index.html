@@ -440,11 +440,10 @@ function showBookingForm() {
     '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000" value="'+savedForm.tel+'"></div>' +
     '<div class="form-field" style="padding:12px 0">' +
       (consultFull ?
-        '<label style="display:flex;align-items:flex-start;gap:10px;font-size:12px;letter-spacing:0.1em;color:var(--tan);text-transform:none;cursor:default">' +
-          '<span style="width:16px;height:16px;margin-top:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--tan)">×</span>' +
-          '<span style="text-decoration:line-through">ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
-        '</label>' +
-        '<p style="font-size:11px;color:#8B3A2A;letter-spacing:0.08em;margin-top:8px;line-height:1.7">この日時の商談・購入相談は定員に達しております。ご希望の方は別の日時をご選択ください。</p>'
+        '<div>' +
+          '<p style="font-size:12px;letter-spacing:0.1em;color:var(--tan);text-decoration:line-through;line-height:1.7">ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</p>' +
+          '<p style="font-size:11px;color:#8B3A2A;letter-spacing:0.08em;margin-top:8px;line-height:1.7">この日時の商談・購入相談は定員に達しております。ご希望の方は別の日時をご選択ください。</p>' +
+        '</div>'
       :
         '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;letter-spacing:0.1em;color:var(--soil);text-transform:none">' +
           '<input type="checkbox" id="inp-consult" '+consultChecked+' onchange="checkConsultAvailability(this)" style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0;cursor:pointer">' +
