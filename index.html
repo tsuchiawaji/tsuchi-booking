@@ -395,7 +395,7 @@ function showBookingForm() {
         '<span>ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
       '</label>' +
     '</div>' +
-    '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" rows="5" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。">'+savedForm.note+'</textarea></div>' +
+    '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" rows="5" placeholder="ご紹介者名、ご担当者名、その他ご質問などございましたらご記入ください。">'+savedForm.note+'</textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
     '<button class="submit-btn" id="btn-submit" onclick="submitBooking()">予約を確定する &nbsp;— Reserve</button>' +
     '</div>';
@@ -411,8 +411,7 @@ function submitBooking() {
   var note     = document.getElementById('inp-note').value.trim();
   var consultEl = document.getElementById('inp-consult');
   var consult  = consultEl ? consultEl.checked : false;
-  if(consult) note = '【商談・購入検討】' + (note ? '
-' + note : '');
+  if(consult) note = '【商談・購入検討】' + (note ? '\n' + note : '');
   var errEl  = document.getElementById('err-msg');
 
   if(!name){errEl.textContent='お名前を入力してください';errEl.style.display='block';return;}
