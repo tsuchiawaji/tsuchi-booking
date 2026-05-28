@@ -335,23 +335,52 @@ function renderTimeList() {
   var slots = slotsFor(selectedDate);
   for(var i=0;i<slots.length;i++){
     var t = slots[i];
-    var slot = (availability[selectedDate]&&availability[selectedDate][t])||{groups:0,maxGroups:isHoli(selectedDate)?MAX_GROUPS_HOLI:MAX_GROUPS_WEEK};
-    var left = slot.maxGroups - slot.groups;
+    var defaultMaxConsult = isHoli(selectedDate) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK;
+    var slot = (availability[selectedDate]&&availability[selectedDate][t])||{
+      groups:0, consultGroups:0,
+      maxGroups:MAX_GROUPS_NORMAL,
+      maxConsult:defaultMaxConsult,
+      people:0
+    };
+    var leftNormal  = MAX_GROUPS_NORMAL - (slot.groups||0);
+    var leftConsult = (slot.maxConsult||defaultMaxConsult) - (slot.consultGroups||0);
     var btn = document.createElement('button');
-    btn.className = 'time-btn' + (left<=0?' full':'') + (t===selectedTime?' selected':'');
-    var infoText = left<=0 ? '× 満席' : '○ 空きあり';
+    btn.className = 'time-btn' + (leftNormal<=0?' full':'') + (t===selectedTime?' selected':'');
+    var infoText = leftNormal<=0 ? '× 満席' : '○ 空きあり';
     btn.innerHTML = '<span>'+t+'</span><span class="slot-info">'+infoText+'</span>';
-    if(left>0){
-      btn.dataset.time = t;
-      btn.onclick = function(){ selectTime(this.dataset.time); };
+    if(leftNormal>0){
+      btn.dataset.time         = t;
+      btn.dataset.maxConsult   = slot.maxConsult||defaultMaxConsult;
+      btn.dataset.consultGroups = slot.consultGroups||0;
+      btn.onclick = function(){
+        selectTime(
+          this.dataset.time,
+          parseInt(this.dataset.maxConsult),
+          parseInt(this.dataset.consultGroups)
+        );
+      };
     }
     list.appendChild(btn);
   }
 }
 
-function selectTime(t) {
+function selectTime(t, maxConsult, consultGroups) {
   saveFormValues();
   selectedTime = t;
+  // selectedSlotに商談情報を反映
+  if(selectedSlot) {
+    selectedSlot.maxConsult    = maxConsult    || (isHoli(selectedDate) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK);
+    selectedSlot.consultGroups = consultGroups || 0;
+  } else {
+    selectedSlot = {
+      dateStr: selectedDate,
+      time: t,
+      left: MAX_GROUPS_NORMAL,
+      maxG: MAX_GROUPS_NORMAL,
+      maxConsult: maxConsult    || (isHoli(selectedDate) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK),
+      consultGroups: consultGroups || 0
+    };
+  }
   renderTimeList();
   showBookingForm();
 }
