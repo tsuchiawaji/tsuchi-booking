@@ -165,7 +165,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 // ===================================================
 //  ★ Apps Script の URL を入れてください ★
 // ===================================================
-var API_URL = 'https://script.google.com/macros/s/AKfycbzvht9FSKifwj8yh4cISx_WoaYkhc_0LabqvFZYM-JStDBZi6-jxnPXhSMBFqodMCAf/exec';
+var API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 var MAX_GROUPS_WEEK = 2;
 var MAX_GROUPS_HOLI = 1;
@@ -181,6 +181,9 @@ var currentYear, currentMonth;
 var selectedDate = null;
 var selectedTime = null;
 var availability  = {};
+var weekOffset   = 0;
+var selectedSlot = null;
+var savedForm = { name:'', email:'', email2:'', tel:'', count:1, note:'', consult:false };
 
 function parseDateLocal(str){var p=str.split('-');return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
 function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -313,6 +316,7 @@ function renderCalendar() {
 }
 
 function selectDate(ds) {
+  saveFormValues();
   selectedDate = ds;
   selectedTime = null;
   renderCalendar();
@@ -345,9 +349,27 @@ function renderTimeList() {
 }
 
 function selectTime(t) {
+  saveFormValues();
   selectedTime = t;
   renderTimeList();
   showBookingForm();
+}
+
+function saveFormValues() {
+  var n = document.getElementById('inp-name');
+  var e = document.getElementById('inp-email');
+  var e2 = document.getElementById('inp-email2');
+  var t = document.getElementById('inp-tel');
+  var c = document.getElementById('inp-count');
+  var no = document.getElementById('inp-note');
+  var co = document.getElementById('inp-consult');
+  if(n)  savedForm.name    = n.value;
+  if(e)  savedForm.email   = e.value;
+  if(e2) savedForm.email2  = e2.value;
+  if(t)  savedForm.tel     = t.value;
+  if(c)  savedForm.count   = c.value;
+  if(no) savedForm.note    = no.value;
+  if(co) savedForm.consult = co.checked;
 }
 
 function showBookingForm() {
@@ -356,17 +378,24 @@ function showBookingForm() {
   var d = parseDateLocal(selectedDate);
   var days = ['日','月','火','水','木','金','土'];
   var disp = (d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'） '+selectedTime;
+  var consultChecked = savedForm.consult ? 'checked' : '';
   wrap.innerHTML =
     '<div class="booking-form">' +
     '<div class="selected-info">'+disp+'</div>' +
     '<div class="form-row">' +
-      '<div class="form-field"><label>お名前 &nbsp;Name *</label><input type="text" id="inp-name" placeholder="山田 太郎"></div>' +
-      '<div class="form-field"><label>参加人数 &nbsp;Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="1"></div>' +
+      '<div class="form-field"><label>お名前 &nbsp;Name *</label><input type="text" id="inp-name" placeholder="山田 太郎" value="'+savedForm.name+'"></div>' +
+      '<div class="form-field"><label>参加人数 &nbsp;Guests (max '+MAX_PEOPLE+')</label><input type="number" id="inp-count" min="1" max="'+MAX_PEOPLE+'" value="'+savedForm.count+'"></div>' +
     '</div>' +
-    '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com" autocomplete="email" oninput="this.value=this.value.toLowerCase()"></div>' +
-    '<div class="form-field"><label>メールアドレス（確認） &nbsp;Email Confirm *</label><input type="email" id="inp-email2" placeholder="もう一度入力してください" autocomplete="off" onpaste="return false" ondrop="return false" oninput="this.value=this.value.toLowerCase()"></div>' +
-    '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000"></div>' +
-    '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。"></textarea></div>' +
+    '<div class="form-field"><label>メールアドレス &nbsp;Email *</label><input type="email" id="inp-email" placeholder="example@email.com" autocomplete="email" oninput="this.value=this.value.toLowerCase()" value="'+savedForm.email+'"></div>' +
+    '<div class="form-field"><label>メールアドレス（確認） &nbsp;Email Confirm *</label><input type="email" id="inp-email2" placeholder="もう一度入力してください" autocomplete="off" onpaste="return false" ondrop="return false" oninput="this.value=this.value.toLowerCase()" value="'+savedForm.email2+'"></div>' +
+    '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000" value="'+savedForm.tel+'"></div>' +
+    '<div class="form-field" style="padding:12px 0">' +
+      '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;letter-spacing:0.1em;color:var(--soil);text-transform:none">' +
+        '<input type="checkbox" id="inp-consult" '+consultChecked+' style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0">' +
+        '<span>ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
+      '</label>' +
+    '</div>' +
+    '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" rows="5" placeholder="商談やプロダクト購入についてのご相談、ご紹介者・ご担当者名などございましたらご記入ください。その他、ご質問等もございましたらお気軽にお書き添えください。">'+savedForm.note+'</textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
     '<button class="submit-btn" id="btn-submit" onclick="submitBooking()">予約を確定する &nbsp;— Reserve</button>' +
     '</div>';
@@ -379,7 +408,11 @@ function submitBooking() {
   var email2 = email2El ? email2El.value.trim().toLowerCase() : '';
   var tel    = document.getElementById('inp-tel').value.trim();
   var count  = parseInt(document.getElementById('inp-count').value)||1;
-  var note   = document.getElementById('inp-note').value.trim();
+  var note     = document.getElementById('inp-note').value.trim();
+  var consultEl = document.getElementById('inp-consult');
+  var consult  = consultEl ? consultEl.checked : false;
+  if(consult) note = '【商談・購入検討】' + (note ? '
+' + note : '');
   var errEl  = document.getElementById('err-msg');
 
   if(!name){errEl.textContent='お名前を入力してください';errEl.style.display='block';return;}
