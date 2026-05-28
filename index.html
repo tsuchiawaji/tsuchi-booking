@@ -167,9 +167,10 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 // ===================================================
 var API_URL = 'https://script.google.com/macros/s/AKfycbzvht9FSKifwj8yh4cISx_WoaYkhc_0LabqvFZYM-JStDBZi6-jxnPXhSMBFqodMCAf/exec';
 
-var MAX_GROUPS_WEEK = 2;
-var MAX_GROUPS_HOLI = 1;
-var MAX_PEOPLE      = 4;
+var MAX_GROUPS_WEEK   = 2;   // 商談枠：平日
+var MAX_GROUPS_HOLI   = 1;   // 商談枠：土日祝
+var MAX_GROUPS_NORMAL = 3;   // 通常予約：平日・土日祝共通
+var MAX_PEOPLE        = 4;
 var SLOTS_W     = ['13:00','14:00','15:00','16:00'];
 var SLOTS_H     = ['10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
 var HOLIDAYS    = ['2026-07-20','2026-08-11'];
@@ -296,7 +297,7 @@ function renderCalendar() {
       for(var si=0;si<slots.length;si++){
         var t = slots[si];
         var slot = availability[ds] && availability[ds][t];
-        if(!slot || slot.maxGroups - slot.groups > 0){ hasAnySlot=true; break; }
+        if(!slot || (MAX_GROUPS_NORMAL - (slot.groups||0) > 0)){ hasAnySlot=true; break; }
       }
       if(hasAnySlot) cell.classList.add('has-slot');
       if(ds===selectedDate) cell.classList.add('selected');
@@ -355,6 +356,22 @@ function selectTime(t) {
   showBookingForm();
 }
 
+function checkConsultAvailability(checkbox) {
+  if(!checkbox.checked) return;
+  if(!selectedSlot) return;
+  var maxConsult    = selectedSlot.maxConsult    || (isHoli(selectedSlot.dateStr) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK);
+  var consultGroups = selectedSlot.consultGroups || 0;
+  var leftConsult   = maxConsult - consultGroups;
+  if(leftConsult <= 0) {
+    checkbox.checked = false;
+    var errEl = document.getElementById('err-msg');
+    if(errEl) {
+      errEl.textContent = 'この時間帯の商談枠は満席です。別の日時をお選びください。';
+      errEl.style.display = 'block';
+    }
+  }
+}
+
 function saveFormValues() {
   var n = document.getElementById('inp-name');
   var e = document.getElementById('inp-email');
@@ -391,7 +408,7 @@ function showBookingForm() {
     '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000" value="'+savedForm.tel+'"></div>' +
     '<div class="form-field" style="padding:12px 0">' +
       '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;letter-spacing:0.1em;color:var(--soil);text-transform:none">' +
-        '<input type="checkbox" id="inp-consult" '+consultChecked+' style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0">' +
+        '<input type="checkbox" id="inp-consult" '+consultChecked+' onchange="checkConsultAvailability(this)" style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0;cursor:pointer">' +
         '<span>ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
       '</label>' +
     '</div>' +
@@ -423,6 +440,10 @@ function submitBooking() {
   if(email2El && email !== email2){errEl.textContent='メールアドレスが一致していません。ご確認ください。';errEl.style.display='block';return;}
   if(!tel){errEl.textContent='電話番号を入力してください';errEl.style.display='block';return;}
   if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は1〜'+MAX_PEOPLE+'名です';errEl.style.display='block';return;}
+  // 商談チェックあり：商談枠の残数を確認
+  if(consult && selectedSlot.consultGroups >= selectedSlot.maxConsult){
+    errEl.textContent='商談枠が満席です。別の日時をお選びください。';errEl.style.display='block';return;
+  }
 
   var btn = document.getElementById('btn-submit');
   btn.disabled=true;
@@ -457,7 +478,9 @@ function submitBooking() {
           '<p>'+disp+'<br>'+name+' 様 ／ '+count+'名<br><br>確認メールをお送りしました。<br><span style="font-size:11px;letter-spacing:0.15em;color:var(--tan)">A confirmation email has been sent.</span></p>' +
           '<div class="booking-id">ID : '+res.id+'</div>' +
           '</div>';
-        // 空き状況を再読み込み
+        // フォーム値リセット・空き状況を再読み込み
+        savedForm = { name:'', email:'', email2:'', tel:'', count:1, note:'', consult:false };
+        document.getElementById('booking-form-wrap').innerHTML = '';
         loadMonth(currentYear, currentMonth);
       } else {
         errEl.textContent = res.error||'予約に失敗しました。再度お試しください。';
