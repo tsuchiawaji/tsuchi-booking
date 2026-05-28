@@ -425,6 +425,9 @@ function showBookingForm() {
   var days = ['日','月','火','水','木','金','土'];
   var disp = (d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'） '+selectedTime;
   var consultChecked = savedForm.consult ? 'checked' : '';
+  var maxConsultNow = selectedSlot ? (selectedSlot.maxConsult || (isHoli(selectedSlot.dateStr) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK)) : 1;
+  var consultGroupsNow = selectedSlot ? (selectedSlot.consultGroups || 0) : 0;
+  var consultFull = consultGroupsNow >= maxConsultNow;
   wrap.innerHTML =
     '<div class="booking-form">' +
     '<div class="selected-info">'+disp+'</div>' +
@@ -436,10 +439,18 @@ function showBookingForm() {
     '<div class="form-field"><label>メールアドレス（確認） &nbsp;Email Confirm *</label><input type="email" id="inp-email2" placeholder="もう一度入力してください" autocomplete="off" onpaste="return false" ondrop="return false" oninput="this.value=this.value.toLowerCase()" value="'+savedForm.email2+'"></div>' +
     '<div class="form-field"><label>電話番号 &nbsp;Tel *</label><input type="tel" id="inp-tel" placeholder="090-0000-0000" value="'+savedForm.tel+'"></div>' +
     '<div class="form-field" style="padding:12px 0">' +
-      '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;letter-spacing:0.1em;color:var(--soil);text-transform:none">' +
-        '<input type="checkbox" id="inp-consult" '+consultChecked+' onchange="checkConsultAvailability(this)" style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0;cursor:pointer">' +
-        '<span>ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
-      '</label>' +
+      (consultFull ?
+        '<label style="display:flex;align-items:flex-start;gap:10px;font-size:12px;letter-spacing:0.1em;color:var(--tan);text-transform:none;cursor:default">' +
+          '<span style="width:16px;height:16px;margin-top:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--tan)">×</span>' +
+          '<span style="text-decoration:line-through">ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
+        '</label>' +
+        '<p style="font-size:11px;color:#8B3A2A;letter-spacing:0.08em;margin-top:8px;line-height:1.7">この日時の商談・購入相談は定員に達しております。ご希望の方は別の日時をご選択ください。</p>'
+      :
+        '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:12px;letter-spacing:0.1em;color:var(--soil);text-transform:none">' +
+          '<input type="checkbox" id="inp-consult" '+consultChecked+' onchange="checkConsultAvailability(this)" style="width:16px;height:16px;margin-top:2px;accent-color:var(--soil);flex-shrink:0;cursor:pointer">' +
+          '<span>ご商談や商品のご購入を検討の方はこちらにチェックをお入れください。担当者がご案内いたします。</span>' +
+        '</label>'
+      ) +
     '</div>' +
     '<div class="form-field"><label>備考 &nbsp;Note</label><textarea id="inp-note" rows="5" placeholder="ご紹介者名、ご担当者名、その他ご質問などございましたらご記入ください。">'+savedForm.note+'</textarea></div>' +
     '<p id="err-msg" class="error-msg"></p>' +
