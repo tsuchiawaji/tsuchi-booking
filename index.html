@@ -441,8 +441,12 @@ function submitBooking() {
   if(!tel){errEl.textContent='電話番号を入力してください';errEl.style.display='block';return;}
   if(count<1||count>MAX_PEOPLE){errEl.textContent='参加人数は1〜'+MAX_PEOPLE+'名です';errEl.style.display='block';return;}
   // 商談チェックあり：商談枠の残数を確認
-  if(consult && selectedSlot.consultGroups >= selectedSlot.maxConsult){
-    errEl.textContent='商談枠が満席です。別の日時をお選びください。';errEl.style.display='block';return;
+  if(consult && selectedSlot) {
+    var cg  = selectedSlot.consultGroups || 0;
+    var mc  = selectedSlot.maxConsult || (isHoli(selectedSlot.dateStr) ? MAX_GROUPS_HOLI : MAX_GROUPS_WEEK);
+    if(cg >= mc){
+      errEl.textContent='商談枠が満席です。別の日時をお選びください。';errEl.style.display='block';return;
+    }
   }
 
   var btn = document.getElementById('btn-submit');
