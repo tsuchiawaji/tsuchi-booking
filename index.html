@@ -165,7 +165,7 @@ body{font-family:'Zen Old Mincho',serif;font-weight:300;min-height:100vh;padding
 // ===================================================
 //  ★ Apps Script の URL を入れてください ★
 // ===================================================
-var API_URL = 'https://script.google.com/macros/s/AKfycbzvht9FSKifwj8yh4cISx_WoaYkhc_0LabqvFZYM-JStDBZi6-jxnPXhSMBFqodMCAf/exec';
+var API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 var MAX_GROUPS_WEEK   = 2;   // 商談枠：平日
 var MAX_GROUPS_HOLI   = 1;   // 商談枠：土日祝
@@ -190,7 +190,7 @@ function parseDateLocal(str){var p=str.split('-');return new Date(parseInt(p[0])
 function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function isHoli(ds){var d=parseDateLocal(ds);var dow=d.getDay();return dow===0||dow===6||HOLIDAYS.indexOf(ds)>=0;}
 function slotsFor(ds){return isHoli(ds)?SLOTS_H:SLOTS_W;}
-function inRange(ds){return ds>=EVENT_START&&ds<=EVENT_END;}
+function inRange(ds){var today=fmtDate(new Date());return ds>=EVENT_START&&ds<=EVENT_END&&ds>=today;}
 
 // JSONP
 function jsonp(url,cbName,onSuccess,onError){
